@@ -1,5 +1,7 @@
-import React from 'react';
-import Link from 'next/link';
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 // Simple SVG Icons
 const Icons = {
@@ -72,20 +74,25 @@ const Icons = {
 
 // Updated colors and icons as per new spec
 const subjects = [
-  { name: 'Biology', icon: Icons.Microscope, color: 'bg-[#6ECFA8]', iconColor: 'text-[#4DA381]', character: '👩‍🔬' },
-  { name: 'Chemistry', icon: Icons.Chemistry, color: 'bg-[#FFD562]', iconColor: 'text-[#C9A23A]', character: '🧑‍🔬' },
-  { name: 'English', icon: Icons.English, color: 'bg-[#FF7B7B]', iconColor: 'text-[#B84E4E]', character: '👩‍🏫' },
-  { name: 'Math', icon: Icons.Math, color: 'bg-[#8B7EF8]', iconColor: 'text-[#5F54C9]', character: '🧑‍💻' },
-  { name: 'Physics', icon: Icons.Atom, color: 'bg-[#5AB6FF]', iconColor: 'text-[#3E8BC9]', character: '👨‍🚀' },
-  { name: 'History', icon: Icons.History, color: 'bg-[#C48E73]', iconColor: 'text-[#8F634D]', character: '👴' },
+  { name: 'Biology', icon: Icons.Microscope, color: 'bg-[#6ECFA8]', iconColor: 'text-[#4DA381]' },
+  { name: 'Chemistry', icon: Icons.Chemistry, color: 'bg-[#FFD562]', iconColor: 'text-[#C9A23A]' },
+  { name: 'English', icon: Icons.English, color: 'bg-[#FF7B7B]', iconColor: 'text-[#B84E4E]' },
+  { name: 'Math', icon: Icons.Math, color: 'bg-[#8B7EF8]', iconColor: 'text-[#5F54C9]' },
+  { name: 'Physics', icon: Icons.Atom, color: 'bg-[#5AB6FF]', iconColor: 'text-[#3E8BC9]' },
+  { name: 'History', icon: Icons.History, color: 'bg-[#C48E73]', iconColor: 'text-[#8F634D]' },
 ];
 
 export default function Home() {
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleButtonClick = () => {
+    if (selectedSubject) {
+      router.push('/level');
+    }
+  };
+
   return (
-    // Font changed to "font-nunito" (defined in layout, mapped to variable, but here we can just use the variable if defined in CSS, or let the class work if we set it up as tailwind utility.
-    // However, next/font usually works by variable. We need to add `font-sans` or similar that maps to nunito.
-    // In layout.tsx, I added `variable: "--font-nunito"`.
-    // I need to ensure tailwind knows about it or just use `font-[family-name:var(--font-nunito)]`
     <div className="min-h-screen bg-[#FDF8EF] flex flex-col items-center py-10 px-6 overflow-hidden select-none" style={{ fontFamily: 'var(--font-nunito)' }}>
       {/* Decorative Background Elements */}
       {/* Top Left Shape */}
@@ -113,11 +120,17 @@ export default function Home() {
       </h1>
 
       <div className="grid grid-cols-2 gap-4 w-full max-w-md z-10">
-        {subjects.map((subject) => (
+        {subjects.map((subject) => {
+          const isSelected = selectedSubject === subject.name;
+          return (
           <div
             key={subject.name}
-            // Rounded 24px is roughly rounded-3xl (which is 1.5rem = 24px)
-            className={`${subject.color} rounded-[24px] p-4 h-36 w-36 mx-auto flex flex-col justify-between relative shadow-sm hover:scale-105 transition-transform cursor-pointer`}
+            onClick={() => setSelectedSubject(subject.name)}
+            className={`${subject.color} rounded-[24px] p-4 h-36 w-36 mx-auto flex flex-col justify-between relative shadow-sm cursor-pointer transition-all duration-200 ${
+              isSelected 
+                ? 'ring-4 ring-offset-2 ring-gray-300 scale-[1.02]' 
+                : 'hover:scale-105 opacity-90 hover:opacity-100'
+            }`}
           >
             {/* Icon Circle - Centered */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[80%]">
@@ -133,19 +146,22 @@ export default function Home() {
                 </span>
             </div>
 
-            {/* Character Placeholder - Bottom Right Peeking */}
-            <div className="absolute -bottom-1 -right-1 text-4xl filter drop-shadow-md">
-                {subject.character}
-            </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
-      <Link href="/level" className="w-full max-w-md z-10">
-        <button className="mt-8 w-full bg-[#55B978] hover:bg-[#439660] text-white font-extrabold py-4 rounded-full shadow-lg transition-colors text-lg tracking-wide">
-          Continue
-        </button>
-      </Link>
+      <button
+        onClick={handleButtonClick}
+        disabled={!selectedSubject}
+        className={`mt-8 w-full max-w-md text-white font-extrabold py-4 rounded-full shadow-lg transition-all z-10 text-lg tracking-wide ${
+          selectedSubject 
+            ? 'bg-[#55B978] hover:bg-[#439660] cursor-pointer' 
+            : 'bg-gray-300 cursor-not-allowed'
+        }`}
+      >
+        Continue
+      </button>
     </div>
   );
 }
